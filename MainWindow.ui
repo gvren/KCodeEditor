@@ -7,23 +7,101 @@
     <x>0</x>
     <y>0</y>
     <width>674</width>
-    <height>605</height>
+    <height>599</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>KCodeeditor</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout">
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
     <item>
-     <widget class="QsciScintilla" name="textEdit">
-      <property name="toolTip">
-       <string/>
-      </property>
-      <property name="whatsThis">
-       <string/>
-      </property>
-     </widget>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QsciScintilla" name="textEdit">
+        <property name="toolTip">
+         <string/>
+        </property>
+        <property name="whatsThis">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="widget" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>674</width>
+          <height>71</height>
+         </size>
+        </property>
+        <widget class="QWidget" name="">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>0</y>
+           <width>406</width>
+           <height>67</height>
+          </rect>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QPushButton" name="pushButton">
+              <property name="text">
+               <string>close</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEdit"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_2">
+              <property name="text">
+               <string>find</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QCheckBox" name="checkBox">
+              <property name="text">
+               <string>regular expression</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="checkBox_2">
+              <property name="text">
+               <string>case sensitive</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="checkBox_3">
+              <property name="text">
+               <string>whole word</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
@@ -67,7 +145,7 @@
     </property>
     <widget class="QMenu" name="menuChange_Language">
      <property name="title">
-      <string>Language</string>
+      <string>La&amp;nguage</string>
      </property>
      <addaction name="actionNormal"/>
      <addaction name="actionBash"/>
@@ -257,12 +335,12 @@
   </action>
   <action name="actionNormal">
    <property name="text">
-    <string>Normal</string>
+    <string>&amp;Normal</string>
    </property>
   </action>
   <action name="actionBash">
    <property name="text">
-    <string>Bash</string>
+    <string>&amp;Bash</string>
    </property>
   </action>
   <action name="actionBatch">
@@ -272,12 +350,12 @@
   </action>
   <action name="actionCmake">
    <property name="text">
-    <string>Cmake</string>
+    <string>&amp;Cmake</string>
    </property>
   </action>
   <action name="actionCoffeeScript">
    <property name="text">
-    <string>CoffeeScript</string>
+    <string>C&amp;offeeScript</string>
    </property>
   </action>
   <action name="actionC">
@@ -302,37 +380,37 @@
   </action>
   <action name="actionD">
    <property name="text">
-    <string>D</string>
+    <string>&amp;D</string>
    </property>
   </action>
   <action name="actionFortan">
    <property name="text">
-    <string>Fortan</string>
+    <string>&amp;Fortan</string>
    </property>
   </action>
   <action name="actionHTML">
    <property name="text">
-    <string>HTML</string>
+    <string>&amp;HTML</string>
    </property>
   </action>
   <action name="actionJSON">
    <property name="text">
-    <string>JSON</string>
+    <string>&amp;JSON</string>
    </property>
   </action>
   <action name="actionLua">
    <property name="text">
-    <string>Lua</string>
+    <string>&amp;Lua</string>
    </property>
   </action>
   <action name="actionMakeFIle">
    <property name="text">
-    <string>MakeFIle</string>
+    <string>&amp;MakeFIle</string>
    </property>
   </action>
   <action name="actionMarkDown">
    <property name="text">
-    <string>MarkDown</string>
+    <string>Mar&amp;kDown</string>
    </property>
   </action>
   <action name="actionMat">
@@ -342,12 +420,12 @@
   </action>
   <action name="actionPascal">
    <property name="text">
-    <string>Pascal</string>
+    <string>&amp;Pascal</string>
    </property>
   </action>
   <action name="actionPerl">
    <property name="text">
-    <string>Perl</string>
+    <string>P&amp;erl</string>
    </property>
   </action>
   <action name="actionPython">
@@ -357,27 +435,27 @@
   </action>
   <action name="actionRuby">
    <property name="text">
-    <string>Ruby</string>
+    <string>&amp;Ruby</string>
    </property>
   </action>
   <action name="actionSQL">
    <property name="text">
-    <string>SQL</string>
+    <string>&amp;SQL</string>
    </property>
   </action>
   <action name="actionTeX">
    <property name="text">
-    <string>TeX</string>
+    <string>&amp;TeX</string>
    </property>
   </action>
   <action name="actionYAML">
    <property name="text">
-    <string>YAML</string>
+    <string>&amp;YAML</string>
    </property>
   </action>
   <action name="actionXML">
    <property name="text">
-    <string>XML</string>
+    <string>&amp;XML</string>
    </property>
   </action>
   <action name="actionPrint">
@@ -392,12 +470,12 @@
   </action>
   <action name="actionChange_Font">
    <property name="text">
-    <string>Change Font</string>
+    <string>&amp;Change Font</string>
    </property>
   </action>
   <action name="actionchange_font_color">
    <property name="text">
-    <string>change font color</string>
+    <string>change &amp;font color</string>
    </property>
   </action>
  </widget>
