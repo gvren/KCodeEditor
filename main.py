@@ -300,12 +300,13 @@ class MainWindow(QMainWindow):
 
     def openfiledialog(self):  # open file
         home = expanduser('~')
-        self.path = QFileDialog.getOpenFileName(self, "Open File", home)[0]
-        if self.path:
+        path = QFileDialog.getOpenFileName(self, "Open File", home)[0]
+        if path:
             self.openfile = open(self.path, 'r')
             text = self.openfile.read()
             self.ui.textEdit.setText(str(text))
             extension = self.path.split('.')[-1]
+            self.path = path
             if extension in self.fileToLanguage:
                 language = self.fileToLanguage.get(extension)
                 self.syntaxhighlight(language)
@@ -319,15 +320,17 @@ class MainWindow(QMainWindow):
             text = self.ui.textEdit.text()
             savefile = open(self.path, 'w')
             savefile.write(str(text))
+            
 
     def saveas(self):  # Save as file
         home = expanduser('~')
 
-        self.path = QFileDialog().getSaveFileName(self, "Save File", home)[0]
-        if self.path:
+        path = QFileDialog().getSaveFileName(self, "Save File", home)[0]
+        if path:
             savefile = open(self.path, 'w')
             text = self.ui.textEdit.text()
             savefile.write(str(text))
+            self.path = path
 
     def closeEvent(self, events):
         text = self.ui.textEdit.text()

@@ -197,7 +197,6 @@ class Ui_MainWindow(object):
         self.menuEdit.addSeparator()
         self.menuEdit.addAction(self.actionSelect_All)
         self.menuEdit.addAction(self.actionFind)
-        self.menuEdit.addAction(self.actionReplace)
         self.menuChange_Language.addAction(self.actionNormal)
         self.menuChange_Language.addAction(self.actionBash)
         self.menuChange_Language.addAction(self.actionBatch)
@@ -318,6 +317,6 @@ class Ui_MainWindow(object):
         self.actionPrint.setText(_translate("MainWindow", "Print"))
         self.actionPrint_Preview.setText(_translate("MainWindow", "Print Preview"))
         self.actionChange_Font.setText(_translate("MainWindow", "&Change Font"))
-        self.actionchange_font_color.setText(_translate("MainWindow", "change &font color"))
+        self.actionchange_font_color.setText(_translate("MainWindow", "Change Font Color"))
 
 from PyQt5 import Qsci
