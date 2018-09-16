@@ -37,12 +37,13 @@ class MainWindow(QMainWindow):
         self.ui.actionOpen.triggered.connect(self.openfiledialog)
         self.ui.actionSave.triggered.connect(self.save)
         self.ui.actionSave_As.triggered.connect(self.saveas)
+        self.ui.actionclose.triggered.connect(self.closedocument)
         self.ui.actionQuit.triggered.connect(self.quit)
 
         # Edit Menu
         self.ui.actionFind.triggered.connect(self.find)
-        
-        #used in Finding strings
+
+        # used in Finding strings
         self.ui.checkBox.clicked.connect(self.regexp)
         self.ui.checkBox_2.clicked.connect(self.casesens)
         self.ui.checkBox_3.clicked.connect(self.wholeword)
@@ -84,6 +85,7 @@ class MainWindow(QMainWindow):
         self.ui.actionXML.triggered.connect(self.XML)
         self.ui.actionYAML.triggered.connect(self.YAML)
 
+        self.toolbar()
         # for text editor customization
         self.texteditor()
 
@@ -232,11 +234,22 @@ class MainWindow(QMainWindow):
             'xml': 'XML'
         }
 
+    def toolbar(self):
+        self.ui.toolBar.addAction(self.ui.actionNew)
+        self.ui.toolBar.addAction(self.ui.actionOpen)
+        self.ui.toolBar.addAction(self.ui.actionclose)
+        self.ui.toolBar.addSeparator()
+        self.ui.toolBar.addAction(self.ui.actionSave)
+        self.ui.toolBar.addAction(self.ui.actionSave_As)
+        self.ui.toolBar.addSeparator()
+        self.ui.toolBar.addAction(self.ui.actionUndo)
+        self.ui.toolBar.addAction(self.ui.actionRedo)
+
     def New(self):  # Opens New Window
         self.new = MainWindow()
         self.new.show()
 
-    def find(self):#opens find widget
+    def find(self):  # opens find widget
         self.ui.widget.show()
         self.re = False
         self.cs = False
@@ -246,11 +259,11 @@ class MainWindow(QMainWindow):
         self.ui.pushButton.clicked.connect(self.hidefind)
         self.ui.pushButton_2.clicked.connect(self.search)
 
-    def hidefind(self):#closes the find widget
+    def hidefind(self):  # closes the find widget
         self.ui.widget.hide()
 
-    #used in finding strings
-    
+    # used in finding strings
+
     def regexp(self):
         if self.ui.checkBox.isChecked():
             self.re = True
@@ -269,15 +282,14 @@ class MainWindow(QMainWindow):
         else:
             self.wo = False
 
-    def search(self):#for finding the strings
+    def search(self):  # for finding the strings
         searchtext = self.ui.lineEdit.text()
 
         self.ui.textEdit.findFirst(
             searchtext, self.re, self.cs, self.wo, False)
 
-    def hidestatbar(self): #hides the statusBar
+    def hidestatbar(self):  # hides the statusBar
         self.statusBar.hide()
-
 
     def linenum(self):  # Sets Line Number
         if self.ui.actionShow_line_numbers.isChecked():
@@ -302,10 +314,10 @@ class MainWindow(QMainWindow):
         home = expanduser('~')
         path = QFileDialog.getOpenFileName(self, "Open File", home)[0]
         if path:
-            self.openfile = open(self.path, 'r')
+            self.openfile = open(path, 'r')
             text = self.openfile.read()
             self.ui.textEdit.setText(str(text))
-            extension = self.path.split('.')[-1]
+            extension = path.split('.')[-1]
             self.path = path
             if extension in self.fileToLanguage:
                 language = self.fileToLanguage.get(extension)
@@ -320,7 +332,6 @@ class MainWindow(QMainWindow):
             text = self.ui.textEdit.text()
             savefile = open(self.path, 'w')
             savefile.write(str(text))
-            
 
     def saveas(self):  # Save as file
         home = expanduser('~')
@@ -331,6 +342,42 @@ class MainWindow(QMainWindow):
             text = self.ui.textEdit.text()
             savefile.write(str(text))
             self.path = path
+
+    def closedocument(self):
+        text = self.ui.textEdit.text()
+        if text == "":
+            text = ""
+            self.ui.textEdit.setText(text)
+        else:
+            if self.path is None:
+                a = QMessageBox.question(self, "Save Before Closing", "Do you want to save Before close", QMessageBox(
+                ).Yes | QMessageBox().No | QMessageBox().Cancel, QMessageBox().Cancel)
+                if a == QMessageBox().Yes:
+                    self.saveas
+                    self.ui.textEdit.setText(text)
+                elif a == QMessageBox().No:
+                    text = ""
+                    self.ui.textEdit.setText(text)
+                else:
+                    pass
+            else:
+                f = open(self.path, 'r')
+                filetext = f.read()
+                if filetext == text:
+                    text = ""
+                    self.ui.textEdit.setText(text)
+                else:
+                    a = QMessageBox().question(self, "Save Before Closing", "Do You Want to Save Before Close",
+                                               QMessageBox().Yes | QMessageBox().No | QMessageBox().Cancel, QMessageBox().Cancel)
+                    if a == QMessageBox().Yes:
+                        self.save
+                        text = ""
+                        self.ui.textEdit.setText(text)
+                    elif a == QMessageBox().No:
+                        text = ""
+                        self.ui.textEdit.setText(text)
+                    else:
+                        pass
 
     def closeEvent(self, events):
         text = self.ui.textEdit.text()
