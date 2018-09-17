@@ -6,6 +6,7 @@ from PyQt5.QtPrintSupport import QPrintDialog, QPrintPreviewDialog
 from PyQt5.QtGui import QColor, QTextCursor, QBrush, QTextCharFormat
 from PyQt5.Qsci import *
 
+#import sys
 import sys
 
 #import ui
@@ -21,7 +22,6 @@ import jedi
 
 # re for finding text
 from PyQt5.QtCore import QRegExp
-
 import re
 
 
@@ -42,6 +42,8 @@ class MainWindow(QMainWindow):
 
         # Edit Menu
         self.ui.actionFind.triggered.connect(self.find)
+        self.ui.actionDeselect.triggered.connect(self.deselect)
+        self.ui.actionstatus_bar.triggered.connect(self.show_hidestat)
 
         # used in Finding strings
         self.ui.checkBox.clicked.connect(self.regexp)
@@ -85,9 +87,373 @@ class MainWindow(QMainWindow):
         self.ui.actionXML.triggered.connect(self.XML)
         self.ui.actionYAML.triggered.connect(self.YAML)
 
+        self.ui.textEdit.cursorPositionChanged.connect(self.statbar)
+        
+        # toolbar
         self.toolbar()
+
         # for text editor customization
         self.texteditor()
+
+    def toolbar(self):
+        self.ui.toolBar.addAction(self.ui.actionNew)
+        self.ui.toolBar.addAction(self.ui.actionOpen)
+        self.ui.toolBar.addAction(self.ui.actionclose)
+        self.ui.toolBar.addSeparator()
+        self.ui.toolBar.addAction(self.ui.actionSave)
+        self.ui.toolBar.addAction(self.ui.actionSave_As)
+        self.ui.toolBar.addSeparator()
+        self.ui.toolBar.addAction(self.ui.actionUndo)
+        self.ui.toolBar.addAction(self.ui.actionRedo)
+
+    def texteditor(self):  # Text Editor customization
+        self.path = None  # self.path is for finding files is opened or not
+        self.ui.textEdit.setIndentationsUseTabs(True)
+        self.ui.textEdit.setAutoIndent(True)
+        self.ui.textEdit.setAutoCompletionSource(QsciScintilla.AcsAll)
+        self.ui.textEdit.setAutoCompletionThreshold(1)
+        self.ui.textEdit.setAutoCompletionCaseSensitivity(False)
+        self.ui.textEdit.setBraceMatching(1)
+        if self.ui.actionWordwrap.isChecked():
+            self.ui.textEdit.setWrapMode(QsciScintilla.WrapWord)
+        self.label = QLabel()
+        self.label_2 = QLabel()
+        self.fileToLanguage = {
+            '': 'None',
+            'txt': 'None',
+            'sh': 'Bash',
+            'bat': 'Batch',
+            'coffee': 'CoffeeScript',
+            'c': 'C++',
+            'cpp': 'C++',
+            'cxx': 'C++',
+            'h': 'C++',
+            'hpp': 'C++',
+            'hxx': 'C++',
+            'cs': 'C#',
+            'css': 'CSS',
+            'd': 'D',
+            'f': 'Fortran',
+            'html': 'HTML',
+            'java': 'Java',
+            'js': 'JavaScript',
+            'json': 'JSON',
+            'lua': 'Lua',
+            'md': 'Markdown',
+            'mlx': 'Matlab',
+            'pas': 'Pascal',
+            'pl': 'Perl',
+            'py': 'Python',
+            'rb': 'Ruby',
+            'sql': 'SQL',
+            'yaml': 'YAML',
+            'xml': 'XML'
+        }
+        
+        
+    def show_hidestat(self):
+        if self.ui.actionstatus_bar.isChecked():
+            self.ui.statusBar.show()
+        else:
+            self.ui.statusBar.hide()
+        
+    def statbar(self):
+        textedit = self.ui.textEdit
+        messenger = textedit.SendScintilla
+        pos = messenger(textedit.SCI_GETCURRENTPOS)
+        columnnum = messenger(textedit.SCI_GETCOLUMN,pos)
+        linenum = messenger(textedit.SCI_LINEFROMPOSITION,pos)
+        self.label.setText("line " + str(linenum + 1) + ", column " + str(columnnum+1))
+        self.ui.statusBar.addWidget(self.label,5)
+        self.ui.statusBar.addWidget(self.label_2)
+        self.filetypeshow()
+        
+    def filetypeshow(self):
+        if self.path == None:
+            self.label_2.setText("Normal")
+        else:
+            if '.' in self.path:
+                extension = self.path.split('.')[-1]
+            else:
+                extension = ''
+            if extension in self.fileToLanguage:
+                language = self.fileToLanguage.get(extension)
+                self.label_2.setText(language)
+            else:
+                self.label_2.setText("Normal")
+
+
+    def New(self):  # Opens New Window
+        self.new = MainWindow()
+        self.new.show()
+
+    def openfiledialog(self):  # open file
+        home = expanduser('~')
+        path = QFileDialog.getOpenFileName(self, "Open File", home)[0]
+        if path:
+            self.openfile = open(path, 'r')
+            text = self.openfile.read()
+            self.ui.textEdit.setText(str(text))
+            if '.' in path:
+                extension = path.split('.')[-1]
+            else:
+                extension = ''
+            self.path = path
+            if extension in self.fileToLanguage:
+                language = self.fileToLanguage.get(extension)
+                self.syntaxhighlight(language)
+            else:
+                self.syntaxhighlight('None')
+            self.filetypeshow()
+
+    def save(self):  # save file
+        if self.path is None:
+            return self.saveas()
+        if self.path:
+            text = self.ui.textEdit.text()
+            savefile = open(self.path, 'w')
+            savefile.write(str(text))
+            if '.' in self.path:
+                extension = self.path.split('.')[-1]
+            else:
+                extension = ''
+            if extension in self.fileToLanguage:
+                language = self.fileToLanguage.get(extension)
+                self.syntaxhighlight(language)
+            else:
+                self.syntaxhighlight('None')
+            self.filetypeshow()
+
+    def saveas(self):  # Save as file
+        home = expanduser('~')
+        path = QFileDialog().getSaveFileName(self, "Save File", home)[0]
+        if path:
+            savefile = open(path, 'w')
+            text = self.ui.textEdit.text()
+            savefile.write(str(text))
+            self.path = path
+            if '.' in path:
+                extension = path.split('.')[-1]
+            else:
+                extension = ''
+            if extension in self.fileToLanguage:
+                language = self.fileToLanguage.get(extension)
+                self.syntaxhighlight(language)
+            else:
+                self.syntaxhighlight('None')
+            self.filetypeshow()
+           
+
+    def syntaxhighlight(self, lexer):
+        self.languageToLexer = {
+            'None': None,
+            'Bash': QsciLexerBash,
+            'Batch': QsciLexerBatch,
+            'CMake': QsciLexerCMake,
+            'CoffeeScript': QsciLexerCoffeeScript,
+            'C++': QsciLexerCPP,
+            'C#': QsciLexerCSharp,
+            'CSS': QsciLexerCSS,
+            'D': QsciLexerD,
+            'Fortran': QsciLexerFortran,
+            'HTML': QsciLexerHTML,
+            'Java': QsciLexerJava,
+            'JavaScript': QsciLexerJavaScript,
+            'JSON': QsciLexerJSON,
+            'Lua': QsciLexerLua,
+            'Makefile': QsciLexerMakefile,
+            'Markdown': QsciLexerMarkdown,
+            'Matlab': QsciLexerMatlab,
+            'Pascal': QsciLexerPascal,
+            'Perl': QsciLexerPerl,
+            'Python': QsciLexerPython,
+            'Ruby': QsciLexerRuby,
+            'SQL': QsciLexerSQL,
+            'TeX': QsciLexerTeX,
+            'YAML': QsciLexerYAML,
+            'XML': QsciLexerXML
+        }
+
+        lang = self.languageToLexer.get(lexer)
+        if lang == None:
+            pass
+        else:
+            self.lexer = lang(self)
+            self.ui.textEdit.setLexer(self.lexer)
+            if lexer == "Python":
+                self.autocomplete()
+
+    def autocomplete(self):  # generate python autocomplete using jedi
+        self.api = QsciAPIs(self.lexer)
+
+        source = self.ui.textEdit.text()
+        line = 1
+        column = 0
+        path = ""
+        script = jedi.Script(source, line, column, path)
+        complete = script.completions()
+        l = []
+
+        for i in complete:
+            l.append(i.name)
+        for i in l:
+            self.api.add(i)
+        self.api.prepare()
+
+    def closedocument(self):
+        text = self.ui.textEdit.text()
+        if text == "":
+            text = ""
+            self.ui.textEdit.setText(text)
+        else:
+            if self.path is None:
+                a = QMessageBox.question(self, "Save Before Closing", "Do you want to save Before close", QMessageBox(
+                ).Yes | QMessageBox().No | QMessageBox().Cancel, QMessageBox().Cancel)
+                if a == QMessageBox().Yes:
+                    self.saveas
+                    text = ""
+                    self.ui.textEdit.setText(text)
+                elif a == QMessageBox().No:
+                    text = ""
+                    self.ui.textEdit.setText(text)
+                elif a == QMessageBox().Cancel:
+                    pass
+
+            else:
+                f = open(self.path, 'r')
+                filetext = f.read()
+                if filetext == text:
+                    text = ""
+                    self.ui.textEdit.setText(text)
+                else:
+                    a = QMessageBox().question(self, "Save Before Closing", "Do You Want to Save Before Close",
+                                               QMessageBox().Yes | QMessageBox().No | QMessageBox().Cancel, QMessageBox().Cancel)
+                    if a == QMessageBox().Yes:
+                        self.save
+                        text = ""
+                        self.ui.textEdit.setText(text)
+                    elif a == QMessageBox().No:
+                        text = ""
+                        self.ui.textEdit.setText(text)
+                    elif a == QMessageBox().Cancel:
+                        pass
+        self.path = None
+        self.filetypeshow()
+
+    def quit(self):
+        text = self.ui.textEdit.text()
+        if text == "":
+            a = QMessageBox().question(self, "Exit Dialog", "Do you want to exit",
+                                       QMessageBox().Yes | QMessageBox().No, QMessageBox().No)
+            if a == QMessageBox().Yes:
+                sys.exit()
+            else:
+                pass
+        else:
+            if self.path is None:
+                a = QMessageBox.question(self, "Save Before Closing", "Do you want to save Before exit", QMessageBox(
+                ).Yes | QMessageBox().No | QMessageBox().Cancel, QMessageBox().Cancel)
+                if a == QMessageBox().Yes:
+                    self.saveas()
+                    sys.exit()
+                elif a == QMessageBox().No:
+                    sys.exit()
+                else:
+                    pass
+            else:
+                f = open(self.path, 'r')
+                filetext = f.read()
+                if filetext == text:
+                    a = QMessageBox().question(self, "Exit Dialog", "Do you want to exit",
+                                               QMessageBox().Yes | QMessageBox().No, QMessageBox().No)
+                    if a == QMessageBox().Yes:
+                        sys.exit()
+                else:
+                    a = QMessageBox.question(self, "Save Before Closing", "Do you want to save Before exit", QMessageBox(
+                    ).Yes | QMessageBox().No | QMessageBox().Cancel, QMessageBox().Cancel)
+                    if a == QMessageBox().Yes:
+                        self.save()
+                        sys.exit()
+                    elif a == QMessageBox().No:
+                        sys.exit()
+                    else:
+                        pass
+
+    def find(self):  # opens find widget
+        self.ui.widget.show()
+        self.re = False
+        self.cs = False
+        self.wo = False
+
+        self.ui.pushButton.clicked.connect(self.hidefindbar)
+        self.ui.pushButton_2.clicked.connect(self.search)
+
+    def hidefindbar(self):  # closes the find widget
+        self.ui.widget.hide()
+
+    def search(self):  # for finding the strings
+        textEdit = self.ui.textEdit
+        searchtext = self.ui.lineEdit.text()
+        self.ui.textEdit.findFirst(searchtext, self.re, self.cs, self.wo, False)
+        
+
+
+    # used in finding strings
+
+    def regexp(self):
+        if self.ui.checkBox.isChecked():
+            self.re = True
+        else:
+            self.re = False
+
+    def casesens(self):
+        if self.ui.checkBox_2.isChecked():
+            self.cs = True
+        else:
+            self.cs = False
+
+    def wholeword(self):
+        if self.ui.checkBox_3.isChecked():
+            self.wo = True
+        else:
+            self.wo = False
+            
+            
+    def deselect(self):
+        textedit = self.ui.textEdit
+        messenger = self.ui.textEdit.SendScintilla
+        pos = messenger(textedit.SCI_GETCURRENTPOS)
+        messenger(textedit.SCI_SETEMPTYSELECTION,pos)
+
+    def wordwrap(self):  # Word Wrap
+        if self.ui.actionWordwrap.isChecked():
+            self.ui.textEdit.setWrapMode(QsciScintilla.WrapWord)
+        else:
+            self.ui.textEdit.setWrapMode(QsciScintilla.WrapNone)
+
+    def linenum(self):  # Sets Line Number
+        if self.ui.actionShow_line_numbers.isChecked():
+            self.ui.textEdit.setMarginType(1, QsciScintilla.NumberMargin)
+            self.ui.textEdit.setMarginWidth(1, "0000")
+        else:
+            self.ui.textEdit.setMarginWidth(1, "")
+
+    def fontchange(self):
+        changefont, i = QFontDialog().getFont()
+        if i:
+            self.ui.textEdit.setFont(changefont)
+
+    def changefontcolor(self):
+        color = QColorDialog().getColor()
+        if color.isValid:
+            self.ui.textEdit.setColor(color)
+
+    def about(self):
+        AboutDialog().exec_()
+
+    def about_qt(self):
+        a = QMessageBox().aboutQt(self)
+
 
 #-------------------------------Syntax Highlighting----------------------------------#
 
@@ -190,195 +556,6 @@ class MainWindow(QMainWindow):
 
 #-----------------------------------------Syntax Highghting---------------------------#
 
-    def texteditor(self):  # Text Editor customization
-        self.path = None
-        self.openfile = None
-        self.ui.textEdit.setIndentationsUseTabs(True)
-        self.ui.textEdit.setAutoIndent(True)
-        self.ui.textEdit.setAutoCompletionSource(QsciScintilla.AcsAll)
-        self.ui.textEdit.setAutoCompletionThreshold(1)
-        self.ui.textEdit.setAutoCompletionCaseSensitivity(False)
-        self.ui.textEdit.setBraceMatching(1)
-        if self.ui.actionWordwrap.isChecked():
-            self.ui.textEdit.setWrapMode(QsciScintilla.WrapWord)
-
-        self.fileToLanguage = {
-            '': None,
-            'txt': None,
-            'sh': 'Bash',
-            'bat': 'Batch',
-            'coffee': 'CoffeeScript',
-            'c': 'C++',
-            'cpp': 'C++',
-            'cxx': 'C++',
-            'h': 'C++',
-            'hpp': 'C++',
-            'hxx': 'C++',
-            'cs': 'C#',
-            'css': 'CSS',
-            'd': 'D',
-            'f': 'Fortran',
-            'html': 'HTML',
-            'java': 'Java',
-            'js': 'JavaScript',
-            'json': 'JSON',
-            'lua': 'Lua',
-            'md': 'Markdown',
-            'mlx': 'Matlab',
-            'pas': 'Pascal',
-            'pl': 'Perl',
-            'py': 'Python',
-            'rb': 'Ruby',
-            'sql': 'SQL',
-            'yaml': 'YAML',
-            'xml': 'XML'
-        }
-
-    def toolbar(self):
-        self.ui.toolBar.addAction(self.ui.actionNew)
-        self.ui.toolBar.addAction(self.ui.actionOpen)
-        self.ui.toolBar.addAction(self.ui.actionclose)
-        self.ui.toolBar.addSeparator()
-        self.ui.toolBar.addAction(self.ui.actionSave)
-        self.ui.toolBar.addAction(self.ui.actionSave_As)
-        self.ui.toolBar.addSeparator()
-        self.ui.toolBar.addAction(self.ui.actionUndo)
-        self.ui.toolBar.addAction(self.ui.actionRedo)
-
-    def New(self):  # Opens New Window
-        self.new = MainWindow()
-        self.new.show()
-
-    def find(self):  # opens find widget
-        self.ui.widget.show()
-        self.re = False
-        self.cs = False
-        self.wo = False
-
-        searchtext = self.ui.lineEdit.text()
-        self.ui.pushButton.clicked.connect(self.hidefind)
-        self.ui.pushButton_2.clicked.connect(self.search)
-
-    def hidefind(self):  # closes the find widget
-        self.ui.widget.hide()
-
-    # used in finding strings
-
-    def regexp(self):
-        if self.ui.checkBox.isChecked():
-            self.re = True
-        else:
-            self.re = False
-
-    def casesens(self):
-        if self.ui.checkBox_2.isChecked():
-            self.cs = True
-        else:
-            self.cs = False
-
-    def wholeword(self):
-        if self.ui.checkBox_3.isChecked():
-            self.wo = True
-        else:
-            self.wo = False
-
-    def search(self):  # for finding the strings
-        searchtext = self.ui.lineEdit.text()
-
-        self.ui.textEdit.findFirst(
-            searchtext, self.re, self.cs, self.wo, False)
-
-    def hidestatbar(self):  # hides the statusBar
-        self.statusBar.hide()
-
-    def linenum(self):  # Sets Line Number
-        if self.ui.actionShow_line_numbers.isChecked():
-            self.ui.textEdit.setMarginType(1, QsciScintilla.NumberMargin)
-            self.ui.textEdit.setMarginWidth(1, "0000")
-        else:
-            self.ui.textEdit.setMarginWidth(1, "")
-
-    def about(self):
-        AboutDialog().exec_()
-
-    def about_qt(self):
-        a = QMessageBox().aboutQt(self)
-
-    def wordwrap(self):  # Word Wrap
-        if self.ui.actionWordwrap.isChecked():
-            self.ui.textEdit.setWrapMode(QsciScintilla.WrapWord)
-        else:
-            self.ui.textEdit.setWrapMode(QsciScintilla.WrapNone)
-
-    def openfiledialog(self):  # open file
-        home = expanduser('~')
-        path = QFileDialog.getOpenFileName(self, "Open File", home)[0]
-        if path:
-            self.openfile = open(path, 'r')
-            text = self.openfile.read()
-            self.ui.textEdit.setText(str(text))
-            extension = path.split('.')[-1]
-            self.path = path
-            if extension in self.fileToLanguage:
-                language = self.fileToLanguage.get(extension)
-                self.syntaxhighlight(language)
-            else:
-                self.syntaxhighlight(None)
-
-    def save(self):  # save file
-        if self.path is None:
-            return self.saveas()
-        if self.path:
-            text = self.ui.textEdit.text()
-            savefile = open(self.path, 'w')
-            savefile.write(str(text))
-
-    def saveas(self):  # Save as file
-        home = expanduser('~')
-
-        path = QFileDialog().getSaveFileName(self, "Save File", home)[0]
-        if path:
-            savefile = open(self.path, 'w')
-            text = self.ui.textEdit.text()
-            savefile.write(str(text))
-            self.path = path
-
-    def closedocument(self):
-        text = self.ui.textEdit.text()
-        if text == "":
-            text = ""
-            self.ui.textEdit.setText(text)
-        else:
-            if self.path is None:
-                a = QMessageBox.question(self, "Save Before Closing", "Do you want to save Before close", QMessageBox(
-                ).Yes | QMessageBox().No | QMessageBox().Cancel, QMessageBox().Cancel)
-                if a == QMessageBox().Yes:
-                    self.saveas
-                    self.ui.textEdit.setText(text)
-                elif a == QMessageBox().No:
-                    text = ""
-                    self.ui.textEdit.setText(text)
-                else:
-                    pass
-            else:
-                f = open(self.path, 'r')
-                filetext = f.read()
-                if filetext == text:
-                    text = ""
-                    self.ui.textEdit.setText(text)
-                else:
-                    a = QMessageBox().question(self, "Save Before Closing", "Do You Want to Save Before Close",
-                                               QMessageBox().Yes | QMessageBox().No | QMessageBox().Cancel, QMessageBox().Cancel)
-                    if a == QMessageBox().Yes:
-                        self.save
-                        text = ""
-                        self.ui.textEdit.setText(text)
-                    elif a == QMessageBox().No:
-                        text = ""
-                        self.ui.textEdit.setText(text)
-                    else:
-                        pass
-
     def closeEvent(self, events):
         text = self.ui.textEdit.text()
         if text == "":
@@ -419,109 +596,6 @@ class MainWindow(QMainWindow):
                         events.accept()
                     else:
                         events.ignore()
-
-    def quit(self):
-        text = self.ui.textEdit.text()
-        if text == "":
-            a = QMessageBox().question(self, "Exit Dialog", "Do you want to exit",
-                                       QMessageBox().Yes | QMessageBox().No, QMessageBox().No)
-            if a == QMessageBox().Yes:
-                sys.exit()
-            else:
-                pass
-        else:
-            if self.path is None:
-                a = QMessageBox.question(self, "Save Before Closing", "Do you want to save Before exit", QMessageBox(
-                ).Yes | QMessageBox().No | QMessageBox().Cancel, QMessageBox().Cancel)
-                if a == QMessageBox().Yes:
-                    self.saveas()
-                    sys.exit()
-                elif a == QMessageBox().No:
-                    sys.exit()
-                else:
-                    pass
-            else:
-                f = open(self.path, 'r')
-                filetext = f.read()
-                if filetext == text:
-                    a = QMessageBox().question(self, "Exit Dialog", "Do you want to exit",
-                                               QMessageBox().Yes | QMessageBox().No, QMessageBox().No)
-                    if a == QMessageBox().Yes:
-                        events.accept()
-                else:
-                    a = QMessageBox.question(self, "Save Before Closing", "Do you want to save Before exit", QMessageBox(
-                    ).Yes | QMessageBox().No | QMessageBox().Cancel, QMessageBox().Cancel)
-                    if a == QMessageBox().Yes:
-                        self.save()
-                        sys.exit()
-                    elif a == QMessageBox().No:
-                        sys.exit()
-                    else:
-                        pass
-
-    def syntaxhighlight(self, lexer):
-        self.languageToLexer = {
-            None: None,
-            'Bash': QsciLexerBash,
-            'Batch': QsciLexerBatch,
-            'CMake': QsciLexerCMake,
-            'CoffeeScript': QsciLexerCoffeeScript,
-            'C++': QsciLexerCPP,
-            'C#': QsciLexerCSharp,
-            'CSS': QsciLexerCSS,
-            'D': QsciLexerD,
-            'Fortran': QsciLexerFortran,
-            'HTML': QsciLexerHTML,
-            'Java': QsciLexerJava,
-            'JavaScript': QsciLexerJavaScript,
-            'JSON': QsciLexerJSON,
-            'Lua': QsciLexerLua,
-            'Makefile': QsciLexerMakefile,
-            'Markdown': QsciLexerMarkdown,
-            'Matlab': QsciLexerMatlab,
-            'Pascal': QsciLexerPascal,
-            'Perl': QsciLexerPerl,
-            'Python': QsciLexerPython,
-            'Ruby': QsciLexerRuby,
-            'SQL': QsciLexerSQL,
-            'TeX': QsciLexerTeX,
-            'YAML': QsciLexerYAML,
-            'XML': QsciLexerXML
-        }
-
-        lang = self.languageToLexer.get(lexer)
-        self.lexer = lang(self)
-        self.ui.textEdit.setLexer(self.lexer)
-        if lexer == "Python":
-            self.autocomplete()
-
-    def autocomplete(self):
-        self.api = QsciAPIs(self.lexer)
-
-        source = self.ui.textEdit.text()
-        line = 1
-        column = 0
-        path = ""
-        script = jedi.Script(source, line, column, path)
-        complete = script.completions()
-        l = []
-
-        for i in complete:
-            l.append(i.name)
-        for i in l:
-            self.api.add(i)
-
-        self.api.prepare()
-
-    def fontchange(self):
-        changefont, i = QFontDialog().getFont()
-        if i:
-            self.ui.textEdit.setFont(changefont)
-
-    def changefontcolor(self):
-        color = QColorDialog().getColor()
-        if color.isValid:
-            self.ui.textEdit.setColor(color)
 
 
 if __name__ == "__main__":
