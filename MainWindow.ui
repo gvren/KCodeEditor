@@ -14,7 +14,7 @@
    <string>KCodeeditor</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout_2">
+   <layout class="QHBoxLayout" name="horizontalLayout_4">
     <item>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
@@ -38,7 +38,7 @@
         <property name="minimumSize">
          <size>
           <width>674</width>
-          <height>71</height>
+          <height>100</height>
          </size>
         </property>
         <widget class="QWidget" name="layoutWidget">
@@ -47,7 +47,7 @@
            <x>20</x>
            <y>0</y>
            <width>406</width>
-           <height>67</height>
+           <height>106</height>
           </rect>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -96,6 +96,20 @@
              <widget class="QCheckBox" name="checkBox_3">
               <property name="text">
                <string>whole word</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QLineEdit" name="lineEdit_2"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_3">
+              <property name="text">
+               <string>Replace</string>
               </property>
              </widget>
             </item>
@@ -390,7 +404,7 @@
   </action>
   <action name="actionFind">
    <property name="text">
-    <string>&amp;Find</string>
+    <string>&amp;Find and Replace</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+F</string>
@@ -565,7 +579,7 @@
   </action>
   <action name="actionDeselect">
    <property name="text">
-    <string>Deselect</string>
+    <string>&amp;Deselect</string>
    </property>
   </action>
   <action name="actionstatus_bar">
@@ -576,7 +590,12 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>show status bar</string>
+    <string>show status &amp;bar</string>
+   </property>
+  </action>
+  <action name="actionReplace_2">
+   <property name="text">
+    <string>Replace</string>
    </property>
   </action>
  </widget>

@@ -387,6 +387,7 @@ class MainWindow(QMainWindow):
 
         self.ui.pushButton.clicked.connect(self.hidefindbar)
         self.ui.pushButton_2.clicked.connect(self.search)
+        self.ui.pushButton_3.clicked.connect(self.replace)
 
     def hidefindbar(self):  # closes the find widget
         self.ui.widget.hide()
@@ -418,6 +419,10 @@ class MainWindow(QMainWindow):
         else:
             self.wo = False
             
+    def replace(self):
+        replacetext = self.ui.lineEdit_2.text()
+        textedit = self.ui.textEdit
+        textedit.replace(replacetext)
             
     def deselect(self):
         textedit = self.ui.textEdit
